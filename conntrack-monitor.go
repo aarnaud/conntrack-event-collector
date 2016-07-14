@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/aarnaud/conntrack-monitor/conntrack"
+	"github.com/aarnaud/go-conntrack-monitor/conntrack"
 	"fmt"
 )
 
