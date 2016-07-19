@@ -12,7 +12,7 @@ import (
 )
 
 const ConntrackBufferSize int = 30000000
-const conntrackFlowRegex = `\[(?P<timestamp>\d+\.\d+)\]\s+\[(?P<type>\w+)\]\s+(?P<protoname3>\w+)\s+(?P<protonum3>\d+)\s+(?P<protoname4>\w+)\s+`
+const conntrackFlowRegex = `\[(?P<timestamp>\d+\.\d+)(?:\s+)?\]\s+\[(?P<type>\w+)\]\s+(?P<protoname3>\w+)\s+(?P<protonum3>\d+)\s+(?P<protoname4>\w+)\s+`
 const conntrackOriginalRegex = `(?:.+)src=(?P<originalSrc>\S+)\s+dst=(?P<originalDst>\S+)\s+(?:sport=(?P<originalSport>\d+)\s+dport=(?P<originalDport>\d+)\s+)?(?:packets=(?P<originalPackets>\d+)\s+bytes=(?P<originalBytes>\d+))?`
 const conntrackReplyRegex = `(?:.+)src=(?P<replySrc>\S+)\s+dst=(?P<replyDst>\S+)\s+(?:sport=(?P<replySport>\d+)\s+dport=(?P<replyDport>\d+)\s+)?(?:packets=(?P<replyPackets>\d+)\s+bytes=(?P<replyBytes>\d+))?`
 
