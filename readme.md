@@ -14,3 +14,9 @@ go build conntrack-monitor.go
 
 * On ARM Allwinner A20 : `1500 events/s`
 * On Intel® Core™ i5-4440 CPU: `18000 events/s`
+
+## Use conntrack without sudo
+
+```
+sudo setcap cap_net_admin+ep /usr/sbin/conntrack
+```
