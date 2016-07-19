@@ -32,6 +32,6 @@ func main() {
 		}
 	}()
 	go printFlow(flow_messages)
-	conntrack.Watch([]string{"NEW", "DESTROY"}, flow_messages)
+	conntrack.Watch(flow_messages, []string{"NEW", "DESTROY"}, false)
 
 }

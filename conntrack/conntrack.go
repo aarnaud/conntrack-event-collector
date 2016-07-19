@@ -18,7 +18,7 @@ const conntrackReplyRegex = `(?:.+)src=(?P<replySrc>\S+)\s+dst=(?P<replyDst>\S+)
 
 var conntrackRegexCompiled *regexp.Regexp
 
-func Watch(eventType []string, flowChan chan Flow) {
+func Watch(flowChan chan Flow, eventType []string, natOnly bool, otherArgs ...string) {
 	regexBuffer := bytes.Buffer{}
 	regexBuffer.WriteString(conntrackFlowRegex)
 	regexBuffer.WriteString(conntrackOriginalRegex)
@@ -26,12 +26,27 @@ func Watch(eventType []string, flowChan chan Flow) {
 	conntrackRegexCompiled = regexp.MustCompile(regexBuffer.String())
 
 	for {
-		runConntrack(eventType, flowChan)
+		runConntrack(flowChan, eventType, natOnly, otherArgs...)
 	}
 }
 
-func runConntrack(eventType []string, flowChan chan Flow) {
-	cmd := exec.Command("conntrack", "--buffer-size", strconv.Itoa(ConntrackBufferSize), "-E", "-e", strings.Join(eventType, ","), "-o", "timestamp,extended,id")
+func runConntrack(flowChan chan Flow, eventType []string, natOnly bool, otherArgs ...string) {
+	args := []string{
+		"--buffer-size", strconv.Itoa(ConntrackBufferSize),
+		"-E",
+		"-o", "timestamp,extended,id",
+	}
+	if eventType != nil {
+		args = append(args, "-e")
+		args = append(args, strings.Join(eventType, ","))
+	}
+	if natOnly {
+		args = append(args, "-n")
+	}
+	if otherArgs != nil {
+		args = append(args, otherArgs...)
+	}
+	cmd := exec.Command("conntrack", args...)
 	stderrPipe, err := cmd.StderrPipe()
 	if err != nil {
 		log.Print("Error conntrack:", err)
