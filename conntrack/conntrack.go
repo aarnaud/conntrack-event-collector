@@ -3,7 +3,7 @@ package conntrack
 import (
 	"bufio"
 	"bytes"
-	"log"
+	log "github.com/Sirupsen/logrus"
 	"net"
 	"os/exec"
 	"regexp"
@@ -49,7 +49,7 @@ func runConntrack(flowChan chan Flow, eventType []string, natOnly bool, otherArg
 	cmd := exec.Command("conntrack", args...)
 	stderrPipe, err := cmd.StderrPipe()
 	if err != nil {
-		log.Print("Error conntrack:", err)
+		log.Errorln("Error conntrack: ", err)
 	}
 
 	go func() {
@@ -57,26 +57,26 @@ func runConntrack(flowChan chan Flow, eventType []string, natOnly bool, otherArg
 		for {
 			line, _, err := stderr.ReadLine()
 			if err != nil {
-				log.Print("Error stderr readline:", err)
+				log.Errorln("Error stderr readline: ", err)
 				break
 			}
-			log.Println(string(line))
+			log.Warnln(string(line))
 		}
 	}()
 
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Print("Error conntrack:", err)
+		log.Errorln("Error conntrack: ", err)
 	}
 	stdout := bufio.NewReader(stdoutPipe)
-	log.Println("Starting conntrack...")
+	log.Infoln("Starting conntrack...")
 	cmd.Start()
 
 	var buffer bytes.Buffer
 	for {
 		frag, isPrefix, err := stdout.ReadLine()
 		if err != nil {
-			log.Print("Error stdout readline:", err)
+			log.Errorln("Error stdout readline: ", err)
 			break
 		}
 		buffer.Write(frag)
@@ -171,7 +171,7 @@ func flowParse(str string) Flow {
 		}
 	}
 	if len(result) == 0 {
-		log.Print("parse error of: %s", str)
+		log.Errorln("parse error of: ", str)
 	}
 
 	return flow

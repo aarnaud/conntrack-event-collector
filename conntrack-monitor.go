@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/aarnaud/go-conntrack-monitor/conntrack"
-	"log"
+	log "github.com/Sirupsen/logrus"
 	"time"
 )
 
@@ -12,7 +12,7 @@ var count int = 0
 var flow_messages = make(chan conntrack.Flow, 128)
 
 func printFlow(flowChan <-chan conntrack.Flow) {
-	for 0 == 0 {
+	for {
 		flow := <-flowChan
 		if flow.Type != "" {
 			//fmt.Printf("#+%v\n", flow)
@@ -24,10 +24,14 @@ func printFlow(flowChan <-chan conntrack.Flow) {
 }
 
 func main() {
+	log.SetLevel(log.InfoLevel)
+	log.SetFormatter(&log.TextFormatter{})
+	log.Info("Starting...")
+
 	go func() {
 		for {
 			time.Sleep(60 * time.Second)
-			log.Println(fmt.Sprintf("average %d events/s", count/60))
+			log.Infoln(fmt.Sprintf("average %d events/s", count/60))
 			count = 0
 		}
 	}()
