@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
+	"github.com/aarnaud/go-conntrack-monitor/amqpProducer"
+	"github.com/aarnaud/go-conntrack-monitor/config"
 	"github.com/aarnaud/go-conntrack-monitor/conntrack"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"time"
 )
 
 var cli = &cobra.Command{
@@ -47,27 +49,41 @@ func init() {
 	flags.String("amqp-key", "", "RabbitMQ client key")
 	viper.BindPFlag("amqp_key", flags.Lookup("amqp-key"))
 
-	flags.String("amqp-user", "admin", "RabbitMQ user")
+	flags.String("amqp-user", "guest", "RabbitMQ user")
 	viper.BindPFlag("amqp_user", flags.Lookup("amqp-user"))
 
-	flags.String("amqp-password", "admin", "RabbitMQ password")
+	flags.String("amqp-password", "guest", "RabbitMQ password")
 	viper.BindPFlag("amqp_password", flags.Lookup("amqp-password"))
+
+	flags.String("amqp-exchange", "conntrack", "RabbitMQ Exchange")
+	viper.BindPFlag("amqp_exchange", flags.Lookup("amqp-exchange"))
 }
 
 func main() {
 	cli.Execute()
 }
 
-var count int = 0
-
 var flow_messages = make(chan conntrack.Flow, 128)
 
-func printFlow(flowChan <-chan conntrack.Flow) {
+func publishFlow(flowChan <-chan conntrack.Flow, config *config.ServiceConfig) {
+	channel, err := amqpProducer.Channel(config)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	for {
 		flow := <-flowChan
 		if flow.Type != "" {
-			//log.Debugf("#+%v\n", flow)
-			count++
+			body, err := json.Marshal(flow)
+			if err != nil {
+				log.Errorln(err)
+				continue
+			}
+			err = amqpProducer.Publish(channel, config.AMQPExchange, body)
+			if err != nil {
+				log.Errorln(err)
+				continue
+			}
 		}
 
 	}
@@ -86,16 +102,24 @@ func runConntrackMonitor() {
 	}
 
 	log.SetFormatter(&log.TextFormatter{})
-	log.Debugln("Config:", viper.AllSettings())
 	log.Info("Starting...")
 
-	go func() {
-		for {
-			time.Sleep(60 * time.Second)
-			log.Infoln(fmt.Sprintf("average %d events/s", count/60))
-			count = 0
-		}
-	}()
-	go printFlow(flow_messages)
+	config := &config.ServiceConfig{
+		AMQPHost:         viper.GetString("amqp_host"),
+		AMQPPort:         viper.GetInt("amqp_port"),
+		AMQPUser:         viper.GetString("amqp_user"),
+		AMQPPassword:     viper.GetString("amqp_password"),
+		AMQPCa:           viper.GetString("amqp_ca"),
+		AMQPCrt:          viper.GetString("amqp_crt"),
+		AMQPKey:          viper.GetString("amqp_key"),
+		AMQPExchangeType: "direct", //Exchange type - direct|fanout|topic|x-custom
+		AMQPExchange:     viper.GetString("amqp_exchange"),
+		AMQPNoWait:       false,
+	}
+
+	log.Debugf("Config: %+v", config)
+
+	go publishFlow(flow_messages, config)
+
 	conntrack.Watch(flow_messages, []string{"NEW", "DESTROY"}, false)
 }
