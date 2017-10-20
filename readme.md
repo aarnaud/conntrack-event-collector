@@ -46,3 +46,101 @@ Flags:
   -v, --verbose                Enable verbose
 
 ```
+
+## Example of event
+
+### NEW
+
+```json
+{
+  "Timestamp": 0,
+  "Type": "NEW",
+  "Id": 0,
+  "Original": {
+    "Layer3": {
+      "Protonum": 2,
+      "Protoname": "ipv4",
+      "Src": "192.168.1.xxx",
+      "Dst": "xxx.xxx.xxx.xxx"
+    },
+    "Layer4": {
+      "Protonum": 0,
+      "Protoname": "tcp",
+      "Sport": 42216,
+      "Dport": 80
+    },
+    "Counter": {
+      "Packets": 0,
+      "Bytes": 0
+    }
+  },
+  "Reply": {
+    "Layer3": {
+      "Protonum": 2,
+      "Protoname": "ipv4",
+      "Src": "xxx.xxx.xxx.xxx",
+      "Dst": "192.168.0.xxx"
+    },
+    "Layer4": {
+      "Protonum": 0,
+      "Protoname": "tcp",
+      "Sport": 80,
+      "Dport": 42216
+    },
+    "Counter": {
+      "Packets": 0,
+      "Bytes": 0
+    }
+  },
+  "UNREPLIED": false,
+  "ASSURED": false
+}
+```
+
+### DESTROY
+
+```json
+{
+  "Timestamp": 0,
+  "Type": "DESTROY",
+  "Id": 0,
+  "Original": {
+    "Layer3": {
+      "Protonum": 2,
+      "Protoname": "ipv4",
+      "Src": "192.168.1.xxx",
+      "Dst": "xxx.xxx.xxx.xxx"
+    },
+    "Layer4": {
+      "Protonum": 0,
+      "Protoname": "tcp",
+      "Sport": 34277,
+      "Dport": 80
+    },
+    "Counter": {
+      "Packets": 4,
+      "Bytes": 305
+    }
+  },
+  "Reply": {
+    "Layer3": {
+      "Protonum": 2,
+      "Protoname": "ipv4",
+      "Src": "xxx.xxx.xxx.xxx",
+      "Dst": "192.168.0.xxx"
+    },
+    "Layer4": {
+      "Protonum": 0,
+      "Protoname": "tcp",
+      "Sport": 80,
+      "Dport": 34277
+    },
+    "Counter": {
+      "Packets": 3,
+      "Bytes": 291
+    }
+  },
+  "UNREPLIED": false,
+  "ASSURED": false
+}
+```
