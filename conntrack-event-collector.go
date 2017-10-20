@@ -80,6 +80,7 @@ func publishFlow(flowChan <-chan conntrack.Flow, conf *config.ServiceConfig) {
 		time.Sleep(time.Second)
 	}
 
+	routerId := config.GetId()
 	for {
 		select {
 		case err = <-connectionCloseChan:
@@ -96,7 +97,7 @@ func publishFlow(flowChan <-chan conntrack.Flow, conf *config.ServiceConfig) {
 					log.Errorln(err)
 					continue
 				}
-				err = amqpProducer.Publish(channel, conf.AMQPExchange, body)
+				err = amqpProducer.Publish(channel, conf.AMQPExchange, body, routerId)
 				if err != nil {
 					log.Errorln(err)
 					continue
@@ -119,6 +120,8 @@ func runConntrackMonitor() {
 
 	log.SetFormatter(&log.TextFormatter{})
 	log.Info("Starting...")
+	log.Infof("Mac address : %s", config.GetMacAddr())
+	log.Infof("Uuid : %s", config.GetId())
 
 	conf := &config.ServiceConfig{
 		AMQPHost:         viper.GetString("amqp_host"),

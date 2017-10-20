@@ -126,7 +126,7 @@ func Channel(config *config.ServiceConfig) (*amqp.Channel, chan *amqp.Error, err
 	return channel, connectionCloseChan, nil
 }
 
-func Publish(channel *amqp.Channel, exchange string, body []byte) error {
+func Publish(channel *amqp.Channel, exchange string, body []byte, routerId string) error {
 
 	err := channel.Publish(
 		exchange, // publish to an exchange
@@ -138,6 +138,9 @@ func Publish(channel *amqp.Channel, exchange string, body []byte) error {
 			DeliveryMode: amqp.Persistent,
 			ContentType:  "application/json",
 			Body:         body,
+			Headers: amqp.Table{
+				"router_id": routerId,
+			},
 		},
 	)
 
