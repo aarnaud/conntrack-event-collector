@@ -6,7 +6,7 @@ import (
 
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/aarnaud/go-conntrack-monitor/config"
+	"github.com/aarnaud/conntrack-event-collector/config"
 	"github.com/streadway/amqp"
 	"io/ioutil"
 	"time"

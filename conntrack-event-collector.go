@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/aarnaud/go-conntrack-monitor/amqpProducer"
-	"github.com/aarnaud/go-conntrack-monitor/config"
-	"github.com/aarnaud/go-conntrack-monitor/conntrack"
+	"github.com/aarnaud/conntrack-event-collector/amqpProducer"
+	"github.com/aarnaud/conntrack-event-collector/config"
+	"github.com/aarnaud/conntrack-event-collector/conntrack"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
