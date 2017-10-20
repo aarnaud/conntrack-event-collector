@@ -82,10 +82,9 @@ func runConntrack(flowChan chan Flow, eventType []string, natOnly bool, otherArg
 		buffer.Write(frag)
 		if !isPrefix {
 			line := buffer.String()
-			go func() {
-				flow := flowParse(line)
-				flowChan <- flow
-			}()
+			// blocking to prevent memory leak
+			flow := flowParse(line)
+			flowChan <- flow
 			buffer.Reset()
 		}
 
