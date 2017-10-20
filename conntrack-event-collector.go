@@ -9,6 +9,8 @@ import (
 	"github.com/aarnaud/conntrack-event-collector/conntrack"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/streadway/amqp"
+	"time"
 )
 
 var cli = &cobra.Command{
@@ -65,29 +67,43 @@ func main() {
 
 var flow_messages = make(chan conntrack.Flow, 128)
 
-func publishFlow(flowChan <-chan conntrack.Flow, config *config.ServiceConfig) {
-	channel, err := amqpProducer.Channel(config)
-	if err != nil {
-		log.Fatalln(err)
+func publishFlow(flowChan <-chan conntrack.Flow, conf *config.ServiceConfig) {
+	var channel *amqp.Channel
+	var err error
+	var connectionCloseChan chan *amqp.Error = make(chan *amqp.Error)
+
+	channel, connectionCloseChan, err = amqpProducer.Channel(conf)
+	// Retry if error
+	for err != nil {
+		log.Errorln(err)
+		channel, connectionCloseChan, err = amqpProducer.Channel(conf)
+		time.Sleep(time.Second)
 	}
 
 	for {
-		flow := <-flowChan
-		if flow.Type != "" {
-			body, err := json.Marshal(flow)
-			if err != nil {
+		select {
+		case err = <-connectionCloseChan:
+			// Retry if error
+			for err != nil {
 				log.Errorln(err)
-				continue
+				channel, connectionCloseChan, err = amqpProducer.Channel(conf)
+				time.Sleep(time.Second)
 			}
-			err = amqpProducer.Publish(channel, config.AMQPExchange, body)
-			if err != nil {
-				log.Errorln(err)
-				continue
+		case flow := <-flowChan:
+			if flow.Type != "" {
+				body, err := json.Marshal(flow)
+				if err != nil {
+					log.Errorln(err)
+					continue
+				}
+				err = amqpProducer.Publish(channel, conf.AMQPExchange, body)
+				if err != nil {
+					log.Errorln(err)
+					continue
+				}
 			}
 		}
-
 	}
-
 }
 
 func runConntrackMonitor() {
@@ -104,7 +120,7 @@ func runConntrackMonitor() {
 	log.SetFormatter(&log.TextFormatter{})
 	log.Info("Starting...")
 
-	config := &config.ServiceConfig{
+	conf := &config.ServiceConfig{
 		AMQPHost:         viper.GetString("amqp_host"),
 		AMQPPort:         viper.GetInt("amqp_port"),
 		AMQPUser:         viper.GetString("amqp_user"),
@@ -117,9 +133,9 @@ func runConntrackMonitor() {
 		AMQPNoWait:       false,
 	}
 
-	log.Debugf("Config: %+v", config)
+	log.Debugf("Config: %+v", conf)
 
-	go publishFlow(flow_messages, config)
+	go publishFlow(flow_messages, conf)
 
 	conntrack.Watch(flow_messages, []string{"NEW", "DESTROY"}, false)
 }

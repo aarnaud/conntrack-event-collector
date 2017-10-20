@@ -71,18 +71,22 @@ func getConnection(config *config.ServiceConfig) (*amqp.Connection, error) {
 	}
 }
 
-func Channel(config *config.ServiceConfig) (*amqp.Channel, error) {
-
+func Channel(config *config.ServiceConfig) (*amqp.Channel, chan *amqp.Error, error) {
 	connection, err := getConnection(config)
 	if err != nil {
-		return nil, fmt.Errorf("Dial: %s", err)
+		return nil, nil, fmt.Errorf("Dial: %s", err)
 	}
+
+	//Make a Go channel for connection error
+	connectionCloseChan := make(chan *amqp.Error)
+	//Attach this Go channel
+	connection.NotifyClose(connectionCloseChan)
 
 	log.Infoln("got AMQP Connection, getting Channel...")
 
 	channel, err := connection.Channel()
 	if err != nil {
-		return nil, fmt.Errorf("Channel: %s", err)
+		return nil, nil, fmt.Errorf("Channel: %s", err)
 	}
 
 	log.Infof("got Channel, declaring %q Exchange (%q)", config.AMQPExchangeType, config.AMQPExchange)
@@ -96,7 +100,7 @@ func Channel(config *config.ServiceConfig) (*amqp.Channel, error) {
 		config.AMQPNoWait, // noWait
 		nil,               // arguments
 	); err != nil {
-		return nil, fmt.Errorf("Exchange Declare: %s", err)
+		return nil, nil, fmt.Errorf("Exchange Declare: %s", err)
 	}
 
 	// Reliable publisher confirms require confirm.select support from the
@@ -107,14 +111,19 @@ func Channel(config *config.ServiceConfig) (*amqp.Channel, error) {
 		confirms := channel.NotifyPublish(make(chan amqp.Confirmation, 128))
 
 		if err := channel.Confirm(false); err != nil {
-			return nil, fmt.Errorf("Channel could not be put into confirm mode: %s", err)
+			return nil, nil, fmt.Errorf("Channel could not be put into confirm mode: %s", err)
 		}
 
-		go confirmRoutine(confirms)
+		// Use a Go channel to stop confirmRoutine when AMQP channel is closed
+		channelCloseChan := make(chan *amqp.Error)
+		channel.NotifyClose(channelCloseChan)
+		go confirmRoutine(confirms, channelCloseChan)
 	}
 	log.Infoln("declared Exchange")
 
-	return channel, nil
+	// Return the AMQP channel and the Go channel
+	// Go channel is used when the AMQP connection is closed to force to reconnect
+	return channel, connectionCloseChan, nil
 }
 
 func Publish(channel *amqp.Channel, exchange string, body []byte) error {
@@ -142,13 +151,20 @@ func Publish(channel *amqp.Channel, exchange string, body []byte) error {
 // One would typically keep a channel of publishings, a sequence number, and a
 // set of unacknowledged sequence numbers and loop until the publishing channel
 // is closed.
-func confirmRoutine(confirms <-chan amqp.Confirmation) {
+func confirmRoutine(confirms <-chan amqp.Confirmation, channelCloseChan <-chan *amqp.Error) error {
 	for {
-		if confirmed := <-confirms; confirmed.Ack {
-			log.Debugf("confirmed delivery with delivery tag: %d", confirmed.DeliveryTag)
-		} else {
-			log.Errorf("failed delivery of delivery tag: %d", confirmed.DeliveryTag)
+		select {
+		case err := <-channelCloseChan:
+			log.Infoln("Closing confirmRoutine")
+			return err
+		case confirmed := <-confirms:
+			if confirmed.Ack {
+				log.Debugf("confirmed delivery with delivery tag: %d", confirmed.DeliveryTag)
+			} else {
+				log.Debugf("failed delivery of delivery tag: %d", confirmed.DeliveryTag)
+			}
+		default:
+			time.Sleep(5 * time.Millisecond)
 		}
 	}
-
 }
