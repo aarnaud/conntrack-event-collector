@@ -22,7 +22,6 @@ func getUrl(config *config.ServiceConfig, isTLS bool) string {
 
 func getConnection(config *config.ServiceConfig) (*amqp.Connection, error) {
 	if config.AMQPKey != "" && config.AMQPCrt != "" && config.AMQPCa != "" {
-		var isTLS = true
 		tlsCfg := new(tls.Config)
 
 		// The self-signing certificate authority's certificate must be included in
@@ -66,10 +65,9 @@ func getConnection(config *config.ServiceConfig) (*amqp.Connection, error) {
 		// If your server name in your certificate is different than the host you are
 		// connecting to, set the hostname used for verification in
 		// ServerName field of the tls.Config struct.
-		return amqp.DialTLS(getUrl(config, isTLS), tlsCfg)
+		return amqp.DialTLS(getUrl(config, true), tlsCfg)
 	} else {
-		var isTLS = false
-		return amqp.Dial(getUrl(config, isTLS))
+		return amqp.Dial(getUrl(config, false))
 	}
 }
 
@@ -106,7 +104,7 @@ func Channel(config *config.ServiceConfig) (*amqp.Channel, error) {
 	if !config.AMQPNoWait {
 		log.Infoln("enabling publishing confirms.")
 
-		confirms := channel.NotifyPublish(make(chan amqp.Confirmation))
+		confirms := channel.NotifyPublish(make(chan amqp.Confirmation, 128))
 
 		if err := channel.Confirm(false); err != nil {
 			return nil, fmt.Errorf("Channel could not be put into confirm mode: %s", err)
