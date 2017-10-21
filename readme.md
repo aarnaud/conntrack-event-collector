@@ -53,43 +53,43 @@ Flags:
 
 ```json
 {
-  "Timestamp": 1508566165785,
-  "Type": "NEW",
-  "Id": 0,
-  "Original": {
-    "Layer3": {
-      "Protonum": 2,
-      "Protoname": "ipv4",
-      "Src": "192.168.1.xxx",
-      "Dst": "xxx.xxx.xxx.xxx"
+  "timestamp": 1508566165785,
+  "type": "NEW",
+  "id": 0,
+  "original": {
+    "layer3": {
+      "protonum": 2,
+      "protoname": "ipv4",
+      "src": "192.168.1.xxx",
+      "dst": "xxx.xxx.xxx.xxx"
     },
-    "Layer4": {
-      "Protonum": 0,
-      "Protoname": "tcp",
-      "Sport": 42216,
-      "Dport": 80
+    "layer4": {
+      "protonum": 0,
+      "protoname": "tcp",
+      "sport": 42216,
+      "dport": 80
     },
-    "Counter": {
-      "Packets": 0,
-      "Bytes": 0
+    "counter": {
+      "packets": 0,
+      "bytes": 0
     }
   },
-  "Reply": {
-    "Layer3": {
-      "Protonum": 2,
-      "Protoname": "ipv4",
-      "Src": "xxx.xxx.xxx.xxx",
-      "Dst": "192.168.0.xxx"
+  "reply": {
+    "layer3": {
+      "protonum": 2,
+      "protoname": "ipv4",
+      "src": "xxx.xxx.xxx.xxx",
+      "dst": "192.168.0.xxx"
     },
-    "Layer4": {
-      "Protonum": 0,
-      "Protoname": "tcp",
-      "Sport": 80,
-      "Dport": 42216
+    "layer4": {
+      "protonum": 0,
+      "protoname": "tcp",
+      "sport": 80,
+      "dport": 42216
     },
-    "Counter": {
-      "Packets": 0,
-      "Bytes": 0
+    "counter": {
+      "packets": 0,
+      "bytes": 0
     }
   },
   "UNREPLIED": false,
@@ -101,43 +101,43 @@ Flags:
 
 ```json
 {
-  "Timestamp": 1508566186345,
-  "Type": "DESTROY",
-  "Id": 0,
-  "Original": {
-    "Layer3": {
-      "Protonum": 2,
-      "Protoname": "ipv4",
-      "Src": "192.168.1.xxx",
-      "Dst": "xxx.xxx.xxx.xxx"
+  "timestamp": 1508566186345,
+  "type": "DESTROY",
+  "id": 0,
+  "original": {
+    "layer3": {
+      "protonum": 2,
+      "protoname": "ipv4",
+      "src": "192.168.1.xxx",
+      "dst": "xxx.xxx.xxx.xxx"
     },
-    "Layer4": {
-      "Protonum": 0,
-      "Protoname": "tcp",
-      "Sport": 34277,
-      "Dport": 80
+    "layer4": {
+      "protonum": 0,
+      "protoname": "tcp",
+      "sport": 34277,
+      "dport": 80
     },
-    "Counter": {
-      "Packets": 4,
-      "Bytes": 305
+    "counter": {
+      "packets": 4,
+      "bytes": 305
     }
   },
-  "Reply": {
-    "Layer3": {
-      "Protonum": 2,
-      "Protoname": "ipv4",
-      "Src": "xxx.xxx.xxx.xxx",
-      "Dst": "192.168.0.xxx"
+  "reply": {
+    "layer3": {
+      "protonum": 2,
+      "protoname": "ipv4",
+      "src": "xxx.xxx.xxx.xxx",
+      "dst": "192.168.0.xxx"
     },
-    "Layer4": {
-      "Protonum": 0,
-      "Protoname": "tcp",
-      "Sport": 80,
-      "Dport": 34277
+    "layer4": {
+      "protonum": 0,
+      "protoname": "tcp",
+      "sport": 80,
+      "dport": 34277
     },
-    "Counter": {
-      "Packets": 3,
-      "Bytes": 291
+    "counter": {
+      "packets": 3,
+      "bytes": 291
     }
   },
   "UNREPLIED": false,

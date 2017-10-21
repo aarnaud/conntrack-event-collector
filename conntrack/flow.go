@@ -5,36 +5,36 @@ import (
 )
 
 type Flow struct {
-	Timestamp int64
-	Type      string
-	Id        int
-	Original  Meta
-	Reply     Meta
+	Timestamp int64  `json:"timestamp"`
+	Type      string `json:"type"`
+	Id        int    `json:"id"`
+	Original  Meta   `json:"original"`
+	Reply     Meta   `json:"reply"`
 	UNREPLIED bool
 	ASSURED   bool
 }
 
 type Meta struct {
-	Layer3  Layer3
-	Layer4  Layer4
-	Counter Counter
+	Layer3  Layer3  `json:"layer3"`
+	Layer4  Layer4  `json:"layer4"`
+	Counter Counter `json:"counter"`
 }
 
 type Layer3 struct {
-	Protonum  int
-	Protoname string
-	Src       net.IP
-	Dst       net.IP
+	Protonum  int    `json:"protonum"`
+	Protoname string `json:"protoname"`
+	Src       net.IP `json:"src"`
+	Dst       net.IP `json:"dst"`
 }
 
 type Layer4 struct {
-	Protonum  int
-	Protoname string
-	Sport     int
-	Dport     int
+	Protonum  int    `json:"protonum"`
+	Protoname string `json:"protoname"`
+	Sport     int    `json:"sport"`
+	Dport     int    `json:"dport"`
 }
 
 type Counter struct {
-	Packets int
-	Bytes   int
+	Packets int `json:"packets"`
+	Bytes   int `json:"bytes"`
 }
