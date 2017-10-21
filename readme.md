@@ -53,7 +53,7 @@ Flags:
 
 ```json
 {
-  "Timestamp": 0,
+  "Timestamp": 1508566165785,
   "Type": "NEW",
   "Id": 0,
   "Original": {
@@ -101,7 +101,7 @@ Flags:
 
 ```json
 {
-  "Timestamp": 0,
+  "Timestamp": 1508566186345,
   "Type": "DESTROY",
   "Id": 0,
   "Original": {

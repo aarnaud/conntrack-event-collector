@@ -5,7 +5,7 @@ import (
 )
 
 type Flow struct {
-	Timestamp int
+	Timestamp int64
 	Type      string
 	Id        int
 	Original  Meta

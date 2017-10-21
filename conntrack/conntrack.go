@@ -108,7 +108,10 @@ func flowParse(str string) Flow {
 		if i != 0 {
 			switch names[i] {
 			case "timestamp":
-				flow.Timestamp, _ = strconv.Atoi(match)
+				// Timestamp in second with float
+				timestamp, _ := strconv.ParseFloat(match, 64)
+				// Timestamp in milliseconds
+				flow.Timestamp = int64(timestamp * 1000)
 				break
 			case "type":
 				flow.Type = match
