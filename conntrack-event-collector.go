@@ -36,6 +36,9 @@ func init() {
 	flags.BoolP("verbose", "v", false, "Enable verbose")
 	viper.BindPFlag("verbose", flags.Lookup("verbose"))
 
+	flags.BoolP("nat-only", "n", false, "Track nat only")
+	viper.BindPFlag("nat_only", flags.Lookup("nat-only"))
+
 	flags.String("amqp-host", "localhost", "RabbitMQ Host")
 	viper.BindPFlag("amqp_host", flags.Lookup("amqp-host"))
 
@@ -140,5 +143,5 @@ func runConntrackMonitor() {
 
 	go publishFlow(flow_messages, conf)
 
-	conntrack.Watch(flow_messages, []string{"NEW", "DESTROY"}, false)
+	conntrack.Watch(flow_messages, []string{"NEW", "DESTROY"}, viper.GetBool("nat_only"))
 }
