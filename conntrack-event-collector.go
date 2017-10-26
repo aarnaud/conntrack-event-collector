@@ -24,7 +24,7 @@ var cliOptionVersion = &cobra.Command{
 	Short: "Print the version.",
 	Long:  "The version of this program",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Version 0.0.1")
+		fmt.Printf("Version 1.0.0")
 	},
 }
 
