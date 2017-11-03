@@ -3,13 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/aarnaud/conntrack-event-collector/amqpProducer"
 	"github.com/aarnaud/conntrack-event-collector/config"
 	"github.com/aarnaud/conntrack-event-collector/conntrack"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
+	log "github.com/aarnaud/conntrack-event-collector/logger"
 	"time"
 )
 
@@ -111,17 +112,28 @@ func publishFlow(flowChan <-chan conntrack.Flow, conf *config.ServiceConfig) {
 }
 
 func runConntrackMonitor() {
+	viper.SetConfigName("conntrack-event-collector")  // name of config file (without extension)
+	viper.AddConfigPath("/etc/owp")        // path to look for the config file in
+	viper.AddConfigPath("/etc/config/owp") // path to look for the config file in
+	viper.AddConfigPath("$HOME/.owp")      // call multiple times to add many search paths
+	viper.AddConfigPath(".")
+
+	err := viper.ReadInConfig() // Find and read the config file
+	if err != nil {            // Handle errors reading the config file
+		log.Infoln(err)
+	}
+
 	// EXPORT OWP_AMQP_HOST=hop
 	viper.SetEnvPrefix("owp")
 	viper.AutomaticEnv()
 
 	if viper.GetBool("verbose") {
-		log.SetLevel(log.DebugLevel)
+		log.SetLevel(logrus.DebugLevel)
 	} else {
-		log.SetLevel(log.InfoLevel)
+		log.SetLevel(logrus.InfoLevel)
 	}
 
-	log.SetFormatter(&log.TextFormatter{})
+	log.SetFormatter(log.GetFormater())
 	log.Info("Starting...")
 	log.Infof("Mac address : %s", config.GetMacAddr())
 	log.Infof("Uuid : %s", config.GetId())

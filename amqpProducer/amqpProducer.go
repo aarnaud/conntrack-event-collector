@@ -2,7 +2,7 @@ package amqpProducer
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/aarnaud/conntrack-event-collector/logger"
 
 	"crypto/tls"
 	"crypto/x509"

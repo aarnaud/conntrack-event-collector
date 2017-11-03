@@ -3,7 +3,7 @@ package conntrack
 import (
 	"bufio"
 	"bytes"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/aarnaud/conntrack-event-collector/logger"
 	"net"
 	"os/exec"
 	"regexp"
