@@ -352,6 +352,18 @@ func GetsockoptICMPv6Filter(fd, level, opt int) (*ICMPv6Filter, error) {
 	return &value, err
 }
 
+// GetsockoptString returns the string value of the socket option opt for the
+// socket associated with fd at the given socket level.
+func GetsockoptString(fd, level, opt int) (string, error) {
+	buf := make([]byte, 256)
+	vallen := _Socklen(len(buf))
+	err := getsockopt(fd, level, opt, unsafe.Pointer(&buf[0]), &vallen)
+	if err != nil {
+		return "", err
+	}
+	return string(buf[:vallen-1]), nil
+}
+
 //sys   recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Socklen) (n int, err error)
 //sys   sendto(s int, buf []byte, flags int, to unsafe.Pointer, addrlen _Socklen) (err error)
 //sys	recvmsg(s int, msg *Msghdr, flags int) (n int, err error)
@@ -571,7 +583,7 @@ func UtimesNano(path string, ts []Timespec) error {
 		return EINVAL
 	}
 	// Darwin setattrlist can set nanosecond timestamps
-	err := setattrlistTimes(path, ts)
+	err := setattrlistTimes(path, ts, 0)
 	if err != ENOSYS {
 		return err
 	}
@@ -594,6 +606,10 @@ func UtimesNanoAt(dirfd int, path string, ts []Timespec, flags int) error {
 	}
 	if len(ts) != 2 {
 		return EINVAL
+	}
+	err := setattrlistTimes(path, ts, flags)
+	if err != ENOSYS {
+		return err
 	}
 	return utimensat(dirfd, path, (*[2]Timespec)(unsafe.Pointer(&ts[0])), flags)
 }
