@@ -1,0 +1,11 @@
+---
+
+verbose: false
+amqp_host: localhost
+amqp_port: 5672
+#amqp_ca:
+#amqp_crt:
+amqp_user: guest
+amqp_password: guest
+amqp_exchange: conntrack
+#router_id:
