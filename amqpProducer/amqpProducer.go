@@ -2,11 +2,11 @@ package amqpProducer
 
 import (
 	"fmt"
-	log "github.com/aarnaud/conntrack-event-collector/logger"
+	log "gitlab.com/OpenWifiPortal/conntrack-event-collector/logger"
 
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/aarnaud/conntrack-event-collector/config"
+	"gitlab.com/OpenWifiPortal/conntrack-event-collector/config"
 	"github.com/streadway/amqp"
 	"io/ioutil"
 	"time"

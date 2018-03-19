@@ -4,8 +4,8 @@ pipeline {
        GOROOT = tool(name: 'Go 1.10', type: 'go')
        GOPATH = "${HOME}/golang"
        PATH =  "$PATH:${GOROOT}/bin"
-       GONAMESPACE = "${GOPATH}/src/github.com/aarnaud"
-       GOWORKSPACE = "${GOPATH}/src/github.com/aarnaud/conntrack-event-collector"
+       GONAMESPACE = "${GOPATH}/src/gitlab.com/OpenWifiPortal"
+       GOWORKSPACE = "${GOPATH}/src/gitlab.com/OpenWifiPortal/conntrack-event-collector"
   }
   stages {
     stage('Add project in GOPATH') {

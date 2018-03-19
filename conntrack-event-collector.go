@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"github.com/aarnaud/conntrack-event-collector/amqpProducer"
-	"github.com/aarnaud/conntrack-event-collector/config"
-	"github.com/aarnaud/conntrack-event-collector/conntrack"
+	"gitlab.com/OpenWifiPortal/conntrack-event-collector/amqpProducer"
+	"gitlab.com/OpenWifiPortal/conntrack-event-collector/config"
+	"gitlab.com/OpenWifiPortal/conntrack-event-collector/conntrack"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
-	log "github.com/aarnaud/conntrack-event-collector/logger"
+	log "gitlab.com/OpenWifiPortal/conntrack-event-collector/logger"
 	"time"
 )
 

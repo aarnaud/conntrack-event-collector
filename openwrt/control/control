@@ -1,7 +1,7 @@
 Package: owp-conntrack-event-collector
 Version: 1.0.0
 Depends: libpthread, conntrack
-Source: https://github.com/aarnaud/conntrack-event-collector
+Source: https://gitlab.com/OpenWifiPortal/conntrack-event-collector
 License: CC BY-NC-SA
 Section: net
 Architecture: all
