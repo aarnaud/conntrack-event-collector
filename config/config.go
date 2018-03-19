@@ -36,6 +36,6 @@ func GetMacAddr() (addr string) {
 }
 
 func GetId() (uuid string) {
-	uuid = fmt.Sprintf("%x", sha256.Sum256([]byte(GetMacAddr())))
+	uuid = fmt.Sprintf("%.6x", sha256.Sum256([]byte(GetMacAddr())))
 	return
 }
