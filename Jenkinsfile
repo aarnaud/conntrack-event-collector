@@ -11,7 +11,7 @@ pipeline {
     stage('Add project in GOPATH') {
       steps {
         sh "mkdir -p $GONAMESPACE"
-        sh "ln -sf $WORKSPACE $GOWORKSPACE"
+        sh "ln -sfT $WORKSPACE $GOWORKSPACE"
       }
     }
     stage('Build') {
