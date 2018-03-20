@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/OpenWifiPortal/conntrack-event-collector/amqpProducer"
-	"gitlab.com/OpenWifiPortal/conntrack-event-collector/config"
-	"gitlab.com/OpenWifiPortal/conntrack-event-collector/conntrack"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
+	"gitlab.com/OpenWifiPortal/conntrack-event-collector/amqpProducer"
+	"gitlab.com/OpenWifiPortal/conntrack-event-collector/config"
+	"gitlab.com/OpenWifiPortal/conntrack-event-collector/conntrack"
 	log "gitlab.com/OpenWifiPortal/conntrack-event-collector/logger"
 	"time"
 )
@@ -112,14 +112,14 @@ func publishFlow(flowChan <-chan conntrack.Flow, conf *config.ServiceConfig) {
 }
 
 func runConntrackMonitor() {
-	viper.SetConfigName("conntrack-event-collector")  // name of config file (without extension)
-	viper.AddConfigPath("/etc/owp")        // path to look for the config file in
-	viper.AddConfigPath("/etc/config/owp") // path to look for the config file in
-	viper.AddConfigPath("$HOME/.owp")      // call multiple times to add many search paths
+	viper.SetConfigName("conntrack-event-collector") // name of config file (without extension)
+	viper.AddConfigPath("/etc/owp")                  // path to look for the config file in
+	viper.AddConfigPath("/etc/config/owp")           // path to look for the config file in
+	viper.AddConfigPath("$HOME/.owp")                // call multiple times to add many search paths
 	viper.AddConfigPath(".")
 
 	err := viper.ReadInConfig() // Find and read the config file
-	if err != nil {            // Handle errors reading the config file
+	if err != nil {             // Handle errors reading the config file
 		log.Infoln(err)
 	}
 

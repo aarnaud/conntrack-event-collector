@@ -6,8 +6,8 @@ import (
 
 	"crypto/tls"
 	"crypto/x509"
-	"gitlab.com/OpenWifiPortal/conntrack-event-collector/config"
 	"github.com/streadway/amqp"
+	"gitlab.com/OpenWifiPortal/conntrack-event-collector/config"
 	"io/ioutil"
 	"time"
 )
