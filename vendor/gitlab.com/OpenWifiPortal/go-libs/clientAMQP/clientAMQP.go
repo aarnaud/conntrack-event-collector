@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"github.com/streadway/amqp"
-	log "gitlab.com/OpenWifiPortal/conntrack-event-collector/logger"
+	log "gitlab.com/OpenWifiPortal/go-libs/logger"
 	"io/ioutil"
 	"time"
 )
@@ -29,13 +29,13 @@ type ClientWrapper struct {
 	Channel             *amqp.Channel
 	Config              ClientConfig
 	ConnectionCloseChan chan *amqp.Error
-	isOk				bool
+	isOk                bool
 }
 
 func New(config ClientConfig) (*ClientWrapper, error) {
 	amqpClient := &ClientWrapper{
 		Config: config,
-		isOk: false,
+		isOk:   false,
 	}
 
 	for {

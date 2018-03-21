@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"fmt"
-	"gitlab.com/OpenWifiPortal/conntrack-event-collector/clientAMQP"
+	"gitlab.com/OpenWifiPortal/go-libs/clientAMQP"
 	"net"
 )
 

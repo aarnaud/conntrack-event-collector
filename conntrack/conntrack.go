@@ -3,7 +3,7 @@ package conntrack
 import (
 	"bufio"
 	"bytes"
-	log "gitlab.com/OpenWifiPortal/conntrack-event-collector/logger"
+	log "gitlab.com/OpenWifiPortal/go-libs/logger"
 	"net"
 	"os/exec"
 	"regexp"

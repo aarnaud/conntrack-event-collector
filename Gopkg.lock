@@ -104,6 +104,15 @@
 
 [[projects]]
   branch = "master"
+  name = "gitlab.com/OpenWifiPortal/go-libs"
+  packages = [
+    "clientAMQP",
+    "logger"
+  ]
+  revision = "a3c1ce84fe8fbf190852286716e91b17189c4dd1"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   revision = "80db560fac1fb3e6ac81dbc7f8ae4c061f5257bd"
@@ -139,6 +148,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "db5983f3cbd936aa65b387bd296a8a9311e21f3cc35ff01883c10d6ffdd6ae8e"
+  inputs-digest = "576a35cc9b5dc7f3e0d12fd44a4e70ec0cfaa3d8ce262cbc7b9b16c3e527bd29"
   solver-name = "gps-cdcl"
   solver-version = 1

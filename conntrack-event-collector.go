@@ -7,10 +7,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
-	"gitlab.com/OpenWifiPortal/conntrack-event-collector/clientAMQP"
 	"gitlab.com/OpenWifiPortal/conntrack-event-collector/config"
 	"gitlab.com/OpenWifiPortal/conntrack-event-collector/conntrack"
-	log "gitlab.com/OpenWifiPortal/conntrack-event-collector/logger"
+	"gitlab.com/OpenWifiPortal/go-libs/clientAMQP"
+	log "gitlab.com/OpenWifiPortal/go-libs/logger"
 )
 
 var amqpClient *clientAMQP.ClientWrapper
