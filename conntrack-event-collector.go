@@ -7,19 +7,18 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
-	"gitlab.com/OpenWifiPortal/conntrack-event-collector/amqpProducer"
+	"gitlab.com/OpenWifiPortal/conntrack-event-collector/clientAMQP"
 	"gitlab.com/OpenWifiPortal/conntrack-event-collector/config"
 	"gitlab.com/OpenWifiPortal/conntrack-event-collector/conntrack"
 	log "gitlab.com/OpenWifiPortal/conntrack-event-collector/logger"
-	"time"
 )
 
+var amqpClient *clientAMQP.ClientWrapper
 var cli = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		runConntrackMonitor()
 	},
 }
-
 var cliOptionVersion = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version.",
@@ -71,41 +70,22 @@ func main() {
 
 var flow_messages = make(chan conntrack.Flow, 128)
 
-func publishFlow(flowChan <-chan conntrack.Flow, conf *config.ServiceConfig) {
-	var channel *amqp.Channel
-	var err error
-	var connectionCloseChan chan *amqp.Error = make(chan *amqp.Error)
-
-	channel, connectionCloseChan, err = amqpProducer.Channel(conf)
-	// Retry if error
-	for err != nil {
-		log.Errorln(err)
-		channel, connectionCloseChan, err = amqpProducer.Channel(conf)
-		time.Sleep(time.Second)
-	}
-
+func publishFlow(flowChan <-chan conntrack.Flow) {
 	routerId := config.GetId()
-	for {
-		select {
-		case err = <-connectionCloseChan:
-			// Retry if error
-			for err != nil {
+	for flow := range flowChan {
+		if flow.Type != "" {
+			body, err := json.Marshal(flow)
+			if err != nil {
 				log.Errorln(err)
-				channel, connectionCloseChan, err = amqpProducer.Channel(conf)
-				time.Sleep(time.Second)
+				continue
 			}
-		case flow := <-flowChan:
-			if flow.Type != "" {
-				body, err := json.Marshal(flow)
-				if err != nil {
-					log.Errorln(err)
-					continue
-				}
-				err = amqpProducer.Publish(channel, conf.AMQPExchange, body, routerId)
-				if err != nil {
-					log.Errorln(err)
-					continue
-				}
+			err = amqpClient.Publish(amqpClient.Config.AMQPExchange, "", body, "", amqp.Table{
+				"router_id": routerId,
+			})
+			if err != nil {
+				log.Errorln(err)
+				amqpClient.WaitConnection()
+				continue
 			}
 		}
 	}
@@ -138,22 +118,27 @@ func runConntrackMonitor() {
 	log.Infof("Mac address : %s", config.GetMacAddr())
 	log.Infof("Uuid : %s", config.GetId())
 
-	conf := &config.ServiceConfig{
-		AMQPHost:         viper.GetString("amqp_host"),
-		AMQPPort:         viper.GetInt("amqp_port"),
-		AMQPUser:         viper.GetString("amqp_user"),
-		AMQPPassword:     viper.GetString("amqp_password"),
-		AMQPCa:           viper.GetString("amqp_ca"),
-		AMQPCrt:          viper.GetString("amqp_crt"),
-		AMQPKey:          viper.GetString("amqp_key"),
-		AMQPExchangeType: "direct", //Exchange type - direct|fanout|topic|x-custom
-		AMQPExchange:     viper.GetString("amqp_exchange"),
-		AMQPNoWait:       false,
+	config.Config = &config.ServiceConfig{
+		ClientAMQPConfig: clientAMQP.ClientConfig{
+			AMQPHost:         viper.GetString("amqp_host"),
+			AMQPPort:         viper.GetInt("amqp_port"),
+			AMQPUser:         viper.GetString("amqp_user"),
+			AMQPPassword:     viper.GetString("amqp_password"),
+			AMQPCa:           viper.GetString("amqp_ca"),
+			AMQPCrt:          viper.GetString("amqp_crt"),
+			AMQPKey:          viper.GetString("amqp_key"),
+			AMQPExchangeType: "direct", //Exchange type - direct|fanout|topic|x-custom
+			AMQPExchange:     viper.GetString("amqp_exchange"),
+			AMQPNoWait:       false,
+		},
+		NatOnly: viper.GetBool("nat_only"),
 	}
 
-	log.Debugf("Config: %+v", conf)
+	log.Debugf("Config: %+v", config.Config)
 
-	go publishFlow(flow_messages, conf)
+	amqpClient, err = clientAMQP.New(config.Config.ClientAMQPConfig)
 
-	conntrack.Watch(flow_messages, []string{"NEW", "DESTROY"}, viper.GetBool("nat_only"))
+	go publishFlow(flow_messages)
+
+	conntrack.Watch(flow_messages, []string{"NEW", "DESTROY"}, config.Config.NatOnly)
 }

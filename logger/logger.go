@@ -211,7 +211,6 @@ func Fatalln(args ...interface{}) {
 func checkIfTerminal(w io.Writer) bool {
 	switch v := w.(type) {
 	case *os.File:
-		return false
 		return terminal.IsTerminal(int(v.Fd()))
 	default:
 		return false

@@ -4,21 +4,18 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"fmt"
+	"gitlab.com/OpenWifiPortal/conntrack-event-collector/clientAMQP"
 	"net"
+)
+
+var (
+	Config *ServiceConfig
 )
 
 //ServerConfig is the server config struct
 type ServiceConfig struct {
-	AMQPHost         string
-	AMQPPort         int
-	AMQPUser         string
-	AMQPPassword     string
-	AMQPCa           string
-	AMQPCrt          string
-	AMQPKey          string
-	AMQPExchangeType string
-	AMQPExchange     string
-	AMQPNoWait       bool
+	ClientAMQPConfig clientAMQP.ClientConfig
+	NatOnly          bool
 }
 
 func GetMacAddr() (addr string) {
