@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"fmt"
-	"gitlab.com/OpenWifiPortal/go-libs/clientAMQP"
+	"gitlab.com/OpenWifiPortal/go-libs/amqp_tools"
 	"net"
 )
 
@@ -14,7 +14,7 @@ var (
 
 //ServerConfig is the server config struct
 type ServiceConfig struct {
-	ClientAMQPConfig clientAMQP.ClientConfig
+	ClientAMQPConfig amqp_tools.ClientConfig
 	NatOnly          bool
 }
 

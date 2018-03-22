@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-const ConntrackBufferSize int = 15000000
+const ConntrackBufferSize = 15000000
 const conntrackFlowRegex = `\[(?P<timestamp>\d+\.\d+)(?:\s+)?\]\s+\[(?P<type>\w+)\]\s+(?P<protoname3>\w+)\s+(?P<protonum3>\d+)\s+(?P<protoname4>\w+)\s+`
 const conntrackOriginalRegex = `(?:.+)src=(?P<originalSrc>\S+)\s+dst=(?P<originalDst>\S+)\s+(?:sport=(?P<originalSport>\d+)\s+dport=(?P<originalDport>\d+)\s+)?(?:packets=(?P<originalPackets>\d+)\s+bytes=(?P<originalBytes>\d+))?`
 const conntrackReplyRegex = `(?:.+)src=(?P<replySrc>\S+)\s+dst=(?P<replyDst>\S+)\s+(?:sport=(?P<replySport>\d+)\s+dport=(?P<replyDport>\d+)\s+)?(?:packets=(?P<replyPackets>\d+)\s+bytes=(?P<replyBytes>\d+))?`
@@ -49,7 +49,7 @@ func runConntrack(flowChan chan Flow, eventType []string, natOnly bool, otherArg
 	cmd := exec.Command("conntrack", args...)
 	stderrPipe, err := cmd.StderrPipe()
 	if err != nil {
-		log.Errorln("Error conntrack: ", err)
+		log.Errorln("error conntrack: ", err)
 	}
 
 	go func() {
@@ -57,7 +57,7 @@ func runConntrack(flowChan chan Flow, eventType []string, natOnly bool, otherArg
 		for {
 			line, _, err := stderr.ReadLine()
 			if err != nil {
-				log.Errorln("Error stderr readline: ", err)
+				log.Errorln("error stderr readline: ", err)
 				break
 			}
 			log.Warnln(string(line))
@@ -66,17 +66,17 @@ func runConntrack(flowChan chan Flow, eventType []string, natOnly bool, otherArg
 
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Errorln("Error conntrack: ", err)
+		log.Errorln("error conntrack: ", err)
 	}
 	stdout := bufio.NewReader(stdoutPipe)
-	log.Infoln("Starting conntrack...")
+	log.Infoln("starting conntrack...")
 	cmd.Start()
 
 	var buffer bytes.Buffer
 	for {
 		frag, isPrefix, err := stdout.ReadLine()
 		if err != nil {
-			log.Errorln("Error stdout readline: ", err)
+			log.Errorln("error stdout readline: ", err)
 			break
 		}
 		buffer.Write(frag)
@@ -92,7 +92,7 @@ func runConntrack(flowChan chan Flow, eventType []string, natOnly bool, otherArg
 }
 
 func flowParse(str string) Flow {
-	var flow Flow = Flow{}
+	var flow = Flow{}
 	flow.Original = Meta{}
 	flow.Original.Layer3 = Layer3{}
 	flow.Original.Layer4 = Layer4{}

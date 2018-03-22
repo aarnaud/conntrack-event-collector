@@ -9,11 +9,11 @@ import (
 	"github.com/streadway/amqp"
 	"gitlab.com/OpenWifiPortal/conntrack-event-collector/config"
 	"gitlab.com/OpenWifiPortal/conntrack-event-collector/conntrack"
-	"gitlab.com/OpenWifiPortal/go-libs/clientAMQP"
+	"gitlab.com/OpenWifiPortal/go-libs/amqp_tools"
 	log "gitlab.com/OpenWifiPortal/go-libs/logger"
 )
 
-var amqpClient *clientAMQP.ClientWrapper
+var amqpClient *amqp_tools.ClientWrapper
 var cli = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		runConntrackMonitor()
@@ -24,7 +24,7 @@ var cliOptionVersion = &cobra.Command{
 	Short: "Print the version.",
 	Long:  "The version of this program",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Version 1.0.0")
+		fmt.Printf("Version 1.1.0")
 	},
 }
 
@@ -62,13 +62,25 @@ func init() {
 
 	flags.String("amqp-exchange", "conntrack", "RabbitMQ Exchange")
 	viper.BindPFlag("amqp_exchange", flags.Lookup("amqp-exchange"))
+
+	flags.String("vault-addr", "http://127.0.0.1:8200", "Vault address")
+	viper.BindPFlag("vault_addr", flags.Lookup("vault-addr"))
+
+	flags.String("vault-token", "", "Vault Token")
+	viper.BindPFlag("vault_token", flags.Lookup("vault-token"))
+
+	flags.String("vault-path-creds", "rabbitmq/creds/owp", "Vault Credentials Path for rabbitmq")
+	viper.BindPFlag("vault_path_creds", flags.Lookup("vault-path-creds"))
+
+	flags.String("vault-path-config", "secret/owp/conntrack-event-collector", "Vault Config Path for rabbitmq")
+	viper.BindPFlag("vault_path_config", flags.Lookup("vault-path-config"))
 }
 
 func main() {
 	cli.Execute()
 }
 
-var flow_messages = make(chan conntrack.Flow, 128)
+var flowMessages = make(chan conntrack.Flow, 128)
 
 func publishFlow(flowChan <-chan conntrack.Flow) {
 	routerId := config.GetId()
@@ -79,7 +91,7 @@ func publishFlow(flowChan <-chan conntrack.Flow) {
 				log.Errorln(err)
 				continue
 			}
-			err = amqpClient.Publish(amqpClient.Config.AMQPExchange, "", body, "", amqp.Table{
+			err = amqpClient.Publish(amqpClient.Config.Exchange, "", body, "", amqp.Table{
 				"router_id": routerId,
 			})
 			if err != nil {
@@ -114,31 +126,35 @@ func runConntrackMonitor() {
 	}
 
 	log.SetFormatter(log.GetFormater())
-	log.Info("Starting...")
-	log.Infof("Mac address : %s", config.GetMacAddr())
-	log.Infof("Uuid : %s", config.GetId())
+	log.Info("starting...")
+	log.Infof("mac address : %s", config.GetMacAddr())
+	log.Infof("uuid : %s", config.GetId())
 
 	config.Config = &config.ServiceConfig{
-		ClientAMQPConfig: clientAMQP.ClientConfig{
-			AMQPHost:         viper.GetString("amqp_host"),
-			AMQPPort:         viper.GetInt("amqp_port"),
-			AMQPUser:         viper.GetString("amqp_user"),
-			AMQPPassword:     viper.GetString("amqp_password"),
-			AMQPCa:           viper.GetString("amqp_ca"),
-			AMQPCrt:          viper.GetString("amqp_crt"),
-			AMQPKey:          viper.GetString("amqp_key"),
-			AMQPExchangeType: "direct", //Exchange type - direct|fanout|topic|x-custom
-			AMQPExchange:     viper.GetString("amqp_exchange"),
-			AMQPNoWait:       false,
+		ClientAMQPConfig: amqp_tools.ClientConfig{
+			Host:            viper.GetString("amqp_host"),
+			Port:            viper.GetInt("amqp_port"),
+			Username:        viper.GetString("amqp_user"),
+			Password:        viper.GetString("amqp_password"),
+			Ca:              viper.GetString("amqp_ca"),
+			Crt:             viper.GetString("amqp_crt"),
+			Key:             viper.GetString("amqp_key"),
+			ExchangeType:    "direct", //Exchange type - direct|fanout|topic|x-custom
+			Exchange:        viper.GetString("amqp_exchange"),
+			NoWait:          false,
+			VaultAddr:       viper.GetString("vault_addr"),
+			VaultToken:      viper.GetString("vault_token"),
+			VaultPathCreds:  viper.GetString("vault_path_creds"),
+			VaultPathConfig: viper.GetString("vault_path_config"),
 		},
 		NatOnly: viper.GetBool("nat_only"),
 	}
 
-	log.Debugf("Config: %+v", config.Config)
+	log.Debugf("config: %+v", config.Config)
 
-	amqpClient, err = clientAMQP.New(config.Config.ClientAMQPConfig)
+	amqpClient, err = amqp_tools.New(&config.Config.ClientAMQPConfig)
 
-	go publishFlow(flow_messages)
+	go publishFlow(flowMessages)
 
-	conntrack.Watch(flow_messages, []string{"NEW", "DESTROY"}, config.Config.NatOnly)
+	conntrack.Watch(flowMessages, []string{"NEW", "DESTROY"}, config.Config.NatOnly)
 }
